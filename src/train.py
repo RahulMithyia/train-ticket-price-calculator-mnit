@@ -14,6 +14,7 @@ class Train:
         pricing_strategy: PricingStrategy,
     ):
         self.train_number = train_number
+        self.stations = stations                # FIX
         self.pricing_strategy = pricing_strategy
 
     def calculate_ticket_price(
@@ -26,15 +27,22 @@ class Train:
     ) -> Decimal:
         """
         Calculate ticket price for this train.
-
-        Args:
-            ticket_type: Type of ticket (General or Tatkal)
-            coach_type: Type of coach
-            number_of_passengers: Number of passengers
-            from_station: Starting station
-            to_station: Destination station
-
-        Returns:
-            Total price for the tickets
         """
-        return Decimal(0)
+
+        # --- VALIDATION ---
+        if from_station not in self.stations:
+            raise ValueError(f"Station not found in route: {from_station}")
+        if to_station not in self.stations:
+            raise ValueError(f"Station not found in route: {to_station}")
+        if from_station == to_station:
+            raise ValueError("From and To stations cannot be the same")
+
+        # --- PRICE CALCULATION USING STRATEGY ---
+        return self.pricing_strategy.calculate_price(
+            ticket_type=ticket_type,
+            coach_type=coach_type,
+            number_of_passengers=number_of_passengers,
+            from_station=from_station,
+            to_station=to_station,
+            stations=self.stations,   # FIX — must pass stations list
+        )
